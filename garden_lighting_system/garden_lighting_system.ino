@@ -12,12 +12,12 @@ const int relayPin =  2; // the number of the LED pin: D12
 int buttonState = 0;         // variable for reading the pushbutton status
 int lastButtonState=0;
 
-//case 1: 16/1 -> 30/4  18:00 - 5:15
+//case 1: 16/1 -> 30/4  18:00 - 5:35
     //5:15-> 18:15 offtime == 5*10000+15*100+0 = 51500 -> 18*10000+15*100+00 = 180000 
 const int c1_date_start = 116;//16+1*100=116
 const int c1_date_end = 430;//30+4*100=430
-const long c1_time_start = 51500;
-const long c1_time_end = 181500;
+const long c1_time_start = 53500;
+const long c1_time_end = 180000;
 
     //case 2: 1/5 -> 15/10  18:15 - 5:00
 const int c2_date_start = 501;
