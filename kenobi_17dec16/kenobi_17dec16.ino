@@ -1,3 +1,7 @@
+/*******************************
+*         Author : thienkyo    *
+*                              *
+********************************/
 #include <SPI.h>
 #include <RFID.h>
 #include <Servo.h>
