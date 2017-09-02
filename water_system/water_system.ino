@@ -114,8 +114,8 @@ void loop () {
         fail_safe_start_time = now;
       }
     }
-    //turn off at 6:47:30
-    if(now.hour() == 6 && now.minute() == 33 && now.second() == 0){
+    //turn off at 
+    if(now.hour() == 6 && now.minute() == 32 && now.second() == 0){
       digitalWrite(relayPin,LOW);
     }
     
@@ -147,7 +147,7 @@ void loop () {
       }
     }
     //turn off at 
-    if(now.hour() == 12 && now.minute() == 1 && now.second() == 0){
+    if(now.hour() == 12 && now.minute() == 0 && now.second() == 30){
       digitalWrite(relayPin,LOW);
     }
     
@@ -159,7 +159,7 @@ void loop () {
       }
     }
     //turn off at 16:52
-    if(now.hour() == 15 && now.minute() == 33 && now.second() == 0){
+    if(now.hour() == 15 && now.minute() == 32 && now.second() == 0){
       digitalWrite(relayPin,LOW);
     }
     
