@@ -1,11 +1,10 @@
-/*******************************          
-*           Author : thienkyo  *
+/*******************************
+*       Author : thienkyo      *
 *                              *
 ********************************/
 #include <SPI.h>
 #include <RFID.h>
 #include <Servo.h>
-#include "pitches.h"
 #include <Wire.h>
 #include <EEPROM.h>
 
@@ -14,7 +13,7 @@ RFID rfid(10, 5);
 int addr = 0;
 byte cnt = 0;// number of card
 byte master_count = 0;
-boolean isMaster = false; // master is present
+boolean isMaster = false; // current card is master or not.
 typedef struct {
   byte data[5];
 }  cardData;
@@ -27,13 +26,15 @@ byte master2[5] = {0x26, 0x4C, 0x53, 0x8F, 0xB6}; //264C538FB6
 //byte serNum[5];
 byte data[5];
 
-byte servoPin = 9;
 // define pins of the LED, Buzzer and Servo-motor
 byte LED_access = 4;// green
 byte LED_denied = 3;// red
 byte LED_master = 2;// blue
-byte button = 6;
-byte doorPin = 7;
+byte button = 6;  // button to open the door. D6
+byte doorPin = 7; // door sensor D7
+byte twistLockPin = 8; // door servo D8
+byte servoPin = 9; //lock door servo D9
+byte servoInterval = 15;
 
 class Sweeper
 {
@@ -43,8 +44,7 @@ class Sweeper
     int  updateInterval;      // interval between updates
     unsigned long lastUpdate; // last update of position
 
-  public:
-    Sweeper(int interval)
+  public: Sweeper(int interval)
     {
       updateInterval = interval;
       increment = 2;
@@ -131,19 +131,21 @@ class Sweeper
 class Buttoner
 {
     Sweeper sw;
+    Sweeper swdoor;
     byte buttonPin;
     byte buttonState;
     byte lastButtonState;
     long lastDebounceTime = 0;  // the last time the output pin was toggled
     long debounceDelay = 50;    // the debounce time; increase if the output
-    long debounceDelay2 = 3000;
+    long debounceDelay2 = 3000; // for door.
     boolean isOneTime = true;
     boolean isOneTime2 = true;
 
   public:
-    Buttoner(byte bPin, Sweeper sweeper) {
+    Buttoner(byte bPin, Sweeper sweeper, Sweeper swD) {
       buttonPin = bPin;
       sw = sweeper;
+      swdoor = swD;
       pinMode(buttonPin, INPUT_PULLUP);
       buttonState = 0;
       lastButtonState = 0;
@@ -227,9 +229,10 @@ class Buttoner
 
 };
 
-Sweeper sweeper1(15);
-Buttoner b1(button, sweeper1); // the number of relay pin : D6 and pushbutton pin: D10
-Buttoner door(doorPin, sweeper1);
+Sweeper sweeper1(servoInterval); // servo pull the latch
+Sweeper sweeper2(servoInterval); // servo twist the lock notch.
+Buttoner b1(button, sweeper1, sweeper2); // the number of relay pin : D6 and pushbutton pin: D10
+Buttoner door(doorPin, sweeper1, sweeper2);
 void setup()
 {
   Serial.begin(9600); // initialize serial communication
@@ -257,8 +260,8 @@ void setup()
 
 void loop()
 {
-  b1.doAction2();
-  door.doorCheck();
+  b1.doAction2(); //check the button if it is pressed or not
+  door.doorCheck(); //check the door if it is closed or not by the door sensor.
   //sweeper1.Update();
   //Serial.print("pos: ");
   //Serial.println(sweeper1.readPos());
@@ -341,7 +344,7 @@ void loop()
         isMaster = false;
       }
     } else if (master_count == 0) { // key card to open door.
-      Serial.println(F("authenticate the card"));
+      Serial.println(F("Start: authenticate the card"));
       for (int i = 0; i < cnt; i++) { //loop all the cards in memory
         if (ByteArrayCompare(cardlist[i].data, data, 5)) {
           if (sweeper1.readPos() < 100) {
@@ -356,7 +359,6 @@ void loop()
       }
       Serial.println(F("End : authenticate the card"));
     } else if (master_count == 1 && !isMaster) { // add new card.
-
       for (byte y = 0; y < 5; y++) {
         if (data[y] < 16) {
           Serial.print("0");
