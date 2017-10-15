@@ -90,7 +90,7 @@ class Sweeper
           servo.write(i);
           delay(updateInterval);
         }
-        servo.write(14);
+      //  servo.write(14);
         servo.write(11);
         delay(updateInterval);
       }
@@ -110,7 +110,7 @@ class Sweeper
           servo.write(i);
           delay(updateInterval);
         }
-        servo.write(159);
+       // servo.write(159);
         servo.write(167);
         delay(updateInterval);
       }
@@ -118,6 +118,21 @@ class Sweeper
       Serial.print("posRead to180: ");
       Serial.println(posRead);
     }
+
+    void sweepTo(int Npos)//open
+  {
+    int in = 1;
+    pos = servo.read();
+    in = Npos > pos ? increment : -increment;
+    for (int i = pos; Npos > pos ? i <= Npos : i >= Npos ; i += in)
+      {
+        servo.write(i);
+        delay(updateInterval);
+      }
+   // posRead = servo.read();
+    Serial.print(F("end pos: "));
+    Serial.println(pos);
+  }
 
     int readPos() {
       return servo.read();
@@ -154,8 +169,6 @@ class Buttoner
     void doorCheck() {
       //  buttonState = digitalRead(buttonPin);
       byte reading = digitalRead(buttonPin);
-      //Serial.print("Read: ");
-      //Serial.println(reading);
 
       if (reading != lastButtonState) {
         Serial.println("=============");
