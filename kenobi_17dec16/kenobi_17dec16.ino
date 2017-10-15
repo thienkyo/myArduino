@@ -31,11 +31,13 @@ byte LED_access = 4;// green
 byte LED_denied = 3;// red
 byte LED_master = 2;// blue
 byte button = 6;  // button to open the door. D6
-byte doorPin = 7; // door sensor D7
+byte doorSensorPin = 7; // door sensor D7
 byte twistLockPin = 8; // door servo D8
 byte servoPin = 9; //lock door servo D9
 byte servoInterval = 15;
 
+byte doorServoClosePos = 3;
+byte doorServoOpenPos = 109;
 class Sweeper
 {
     Servo servo;              // the servo
@@ -152,7 +154,7 @@ class Buttoner
     byte lastButtonState;
     long lastDebounceTime = 0;  // the last time the output pin was toggled
     long debounceDelay = 50;    // the debounce time; increase if the output
-    long debounceDelay2 = 3000; // for door.
+    long doorSensorCloseTime = 3000; // for door sensor to close the door automatically.
     boolean isOneTime = true;
     boolean isOneTime2 = true;
 
@@ -165,17 +167,19 @@ class Buttoner
       buttonState = 0;
       lastButtonState = 0;
     }
-
+    //check the door if it is closed or not by the door sensor.
+    //automatically close the door
     void doorCheck() {
       //  buttonState = digitalRead(buttonPin);
       byte reading = digitalRead(buttonPin);
 
+      //reset lastDebounceTime
       if (reading != lastButtonState) {
         Serial.println("=============");
         Serial.println(reading);
         Serial.println(lastButtonState);
         if (reading == LOW) { // when door close
-          Serial.println("LOW");
+          ///Serial.println("LOW");
           if (isOneTime) {
             Serial.println("onetime");
             // reset the debouncing timer
@@ -188,12 +192,13 @@ class Buttoner
           isOneTime2 = true;
         }
       }
-
+      // close the door after doorSensorCloseTime 
       if (reading == LOW) {
-        if ((millis() - lastDebounceTime) > debounceDelay2) {
+        if ((millis() - lastDebounceTime) > doorSensorCloseTime) {
           if (isOneTime2) {
             if (sw.readPos() < 20) {
               sw.to180();
+              swdoor.sweepTo(doorServoClosePos);
               Serial.println("door state: close");
             }
             isOneTime2 = false;
@@ -206,6 +211,7 @@ class Buttoner
       lastButtonState = reading;
     }
 
+    //
     void doAction2() {
       //  buttonState = digitalRead(buttonPin);
       int reading = digitalRead(buttonPin);
@@ -226,9 +232,11 @@ class Buttoner
             // set the servo:
             if (sw.readPos() < 100) {
               sw.to180();
+              swdoor.sweepTo(doorServoClosePos);
               Serial.println(F("close the door"));
             } else {
               sw.toZero();
+              swdoor.sweepTo(doorServoOpenPos);
               Serial.println(F("open the door"));
             }
           }
@@ -245,7 +253,7 @@ class Buttoner
 Sweeper sweeper1(servoInterval); // servo pull the latch
 Sweeper sweeper2(servoInterval); // servo twist the lock notch.
 Buttoner b1(button, sweeper1, sweeper2); // the number of relay pin : D6 and pushbutton pin: D10
-Buttoner door(doorPin, sweeper1, sweeper2);
+Buttoner doorSensor(doorSensorPin, sweeper1, sweeper2);
 void setup()
 {
   Serial.begin(9600); // initialize serial communication
@@ -254,7 +262,6 @@ void setup()
   pinMode(LED_access, OUTPUT);
   pinMode(LED_denied, OUTPUT);
   pinMode(LED_master, OUTPUT);
-  //pinMode(doorPin,INPUT_PULLUP);
 
   ledStatus(4);
   Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -274,7 +281,7 @@ void setup()
 void loop()
 {
   b1.doAction2(); //check the button if it is pressed or not
-  door.doorCheck(); //check the door if it is closed or not by the door sensor.
+  doorSensor.doorCheck(); //check the door if it is closed or not by the door sensor.
   //sweeper1.Update();
   //Serial.print("pos: ");
   //Serial.println(sweeper1.readPos());
@@ -362,9 +369,11 @@ void loop()
         if (ByteArrayCompare(cardlist[i].data, data, 5)) {
           if (sweeper1.readPos() < 100) {
             sweeper1.to180();
+            swdoor.sweepTo(doorServoClosePos);
             Serial.println(F("close the door"));
           } else {
             sweeper1.toZero();
+            swdoor.sweepTo(doorServoOpenPos);
             Serial.println(F("open the door"));
           }
           break;
