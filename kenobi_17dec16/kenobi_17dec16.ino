@@ -20,7 +20,7 @@ typedef struct {
 
 cardData cardlist[50];
 
-byte master[5] = {0xE5, 0xCD, 0x09, 0x53, 0x72}; //E5CD095372
+byte master[5] = {0x10, 0x4A, 0xDD, 0x87, 0x00}; //104ADD8700
 byte master2[5] = {0x26, 0x4C, 0x53, 0x8F, 0xB6}; //264C538FB6
 // put your other cards allowed
 //byte serNum[5];
@@ -32,12 +32,12 @@ byte LED_denied = 3;// red
 byte LED_master = 2;// blue
 byte button = 6;  // button to open the door. D6
 byte doorSensorPin = 7; // door sensor D7
-byte twistLockPin = 8; // door servo D8
+byte twistLockPin = 8; // door servo D8 new
 byte servoPin = 9; //lock door servo D9
 byte servoInterval = 15;
 
-byte doorServoClosePos = 3;
-byte doorServoOpenPos = 109;
+byte doorServoClosePos = 127; //3
+byte doorServoOpenPos = 3; //109
 class Sweeper
 {
     Servo servo;              // the servo
@@ -274,7 +274,12 @@ void setup()
   ledStatus(0);
   sweeper1.Attach(servoPin);
   sweeper1.toZero();
+  sweeper2.Attach(twistLockPin);
+  sweeper2.sweepTo(doorServoClosePos);
+  //EEPROM.write(1023, 0);
   loadcard();
+  //eraseEEPROM();
+  
   Serial.println("+++++++++++++++++++++++++End SetUp+++++++++++++++++++++++++++");
 }
 
@@ -369,11 +374,11 @@ void loop()
         if (ByteArrayCompare(cardlist[i].data, data, 5)) {
           if (sweeper1.readPos() < 100) {
             sweeper1.to180();
-            swdoor.sweepTo(doorServoClosePos);
+            sweeper2.sweepTo(doorServoClosePos);
             Serial.println(F("close the door"));
           } else {
             sweeper1.toZero();
-            swdoor.sweepTo(doorServoOpenPos);
+            sweeper2.sweepTo(doorServoOpenPos);
             Serial.println(F("open the door"));
           }
           break;
@@ -459,7 +464,7 @@ void loadcard() {
   cnt = EEPROM.read(1023);
   Serial.print(F("cnt: "));
   Serial.println(cnt);
-  Serial.print(F("memory: "));
+  Serial.print(F("free memory: "));
   Serial.println(freeRam());
   int aa = 0; //EEPROM address to start reading from
   // int tol = 1;
