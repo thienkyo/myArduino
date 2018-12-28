@@ -1,7 +1,5 @@
-#ifndef backstage_h
-#define backstage_h
-
-#include "Arduino.h"
+#ifndef Buttoner_h
+#define Buttoner_h
 
 class Buttoner
 {
@@ -55,8 +53,8 @@ class Buttoner
         if ((millis() - lastDebounceTime) > doorSensorCloseTime) {
           if (isOneTime2) {
             if (sw.readPos() < 20) {
-              sw.to180();
-              swdoor.sweepTo(doorServoClosePos);
+             // sw.to180();
+             // swdoor.sweepTo(doorServoClosePos);
               Serial.println("door state: close");
             }
             isOneTime2 = false;
@@ -71,10 +69,7 @@ class Buttoner
 
     //
     void doAction(boolean& isOpenRun, boolean& isCloseRun) {
-      //  buttonState = digitalRead(buttonPin);
       int reading = digitalRead(buttonPin);
-      //Serial.print("Read: ");
-      //Serial.println(reading);
 
       if (reading != lastButtonState) {
         // reset the debouncing timer
@@ -87,7 +82,10 @@ class Buttoner
 
           // only toggle the LED if the new button state is HIGH
           if (buttonState == HIGH) {
-            // set the servo:
+            isOpenRun = !isOpenRun;
+            isCloseRun = !isOpenRun;
+
+       /*     
             if (sw.readPos() < 100) {
               isOpenRun = false;
               isCloseRun = true;
@@ -97,6 +95,7 @@ class Buttoner
               isCloseRun = false;
               Serial.println(F("open the door"));
             }
+        */    
           }
         }
       }

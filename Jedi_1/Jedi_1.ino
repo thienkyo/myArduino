@@ -2,6 +2,7 @@
 #include <SoftwareSerial.h>
 #include "RTClib.h"
 #include <EEPROM.h>
+#include "Buttoner.h"
 /* ============================================
 EEPROM memory : 1024 bytes.
   sector1014: the last 10 bytes are reserved ex:
@@ -110,40 +111,10 @@ const int button2 = 11;
 const int button3 = 12;
 const int button4 = 13;
 
-class ButtonController
-{
-  int relayPin;
-  int buttonPin;
-  int buttonState;
-  int lastButtonState;
-    
-  public:
-  ButtonController(int bPin, int rPin){
-      buttonPin = bPin;
-      relayPin = rPin;
-      pinMode(buttonPin,INPUT_PULLUP);
-      pinMode(relayPin,OUTPUT);
-      digitalWrite(relayPin,LOW);
-      buttonState = 0;
-      lastButtonState = 0;
-  }
-    
-  void doAction(){
-      buttonState = digitalRead(buttonPin);
-      // check if the pushbutton is pressed.
-      if(lastButtonState != buttonState){
-        digitalWrite(relayPin,digitalRead(relayPin) ^ 1);
-        Serial.print(F("button: "));
-        Serial.println(buttonPin);
-        Serial.print(F("button state: "));
-        Serial.println(digitalRead(buttonPin));
-      }
-      lastButtonState = buttonState;
-  }
-};
 
-ButtonController b1(button1,relay1);// the number of relay pin : D6 and pushbutton pin: D10
-ButtonController b2(button2,relay2);
+
+Buttoner b1(button1,relay1);// the number of relay pin : D6 and pushbutton pin: D10
+Buttoner b2(button2,relay2);
 //ButtonController b3(button3,relay3);
 //ButtonController b4(button4,relay4);
 

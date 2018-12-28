@@ -62,7 +62,7 @@ byte servoInterval = 15;
 Sweeper sweeper1(servoInterval); // servo pull the latch
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(19200); // initialize serial communication
+  Serial.begin(9600); // initialize serial communication
   sweeper1.Attach(servoPin);
   sweeper1.sweepTo(0);
 }

@@ -52,15 +52,20 @@ class Sweeper
     int in = 1;
     pos = servo.read();
     in = Npos > pos ? increment : -increment;
+    int offSet = Npos > pos ? 3 : -3;
     for (int i = pos; Npos > pos ? i <= Npos : i >= Npos ; i += in)
     {
       servo.write(i);
       delay(updateInterval);
     }
+
+    servo.write(Npos - offSet);
       
    // posRead = servo.read();
     Serial.print(F("end pos: "));
     Serial.println(pos);
+    Serial.print(F("offset pos: "));
+    Serial.println(Npos + offSet);
   }
 
   boolean sweepTo(byte Npos)

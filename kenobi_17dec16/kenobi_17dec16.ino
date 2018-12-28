@@ -101,6 +101,23 @@ class Sweeper
       Serial.println(posRead);
     }
 
+    void to127()//close
+    {
+      byte posRead = servo.read();
+      if (posRead > 0)
+      {
+        for (int i = posRead; i <= 127 ; i += increment)
+        {
+          lastUpdate = millis();
+          servo.write(i);
+          delay(updateInterval);
+        }
+        delay(updateInterval);
+      }
+      posRead = servo.read();
+    }
+
+
     void to180()//close
     {
       byte posRead = servo.read();
@@ -275,7 +292,8 @@ void setup()
   sweeper1.Attach(servoPin);
   sweeper1.toZero();
   sweeper2.Attach(twistLockPin);
-  sweeper2.sweepTo(doorServoClosePos);
+  //sweeper2.sweepTo(doorServoClosePos);
+  sweeper2.to127();
   //EEPROM.write(1023, 0);
   loadcard();
   //eraseEEPROM();
